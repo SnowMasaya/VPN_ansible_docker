@@ -31,39 +31,11 @@ terraform
 #
 ### Usage
 #
-Learning Chainer
-
-```
-*You execute python
-ipython notebook
-```
-
-Slack Communication
-
-```
-*You execute python
-cd slack
-python app.py
-```
-
-Get the Twitter Data
-
-```
-*You execute python
-cd twitter
-python twitter_get_usr_timeline.py
-python sqlite_twitter.py
-```
 
 #
 ### Code Directory Structure
 #
 ```
-Dialogue ipython notebook and Encoder Decoder Model
-  - slack/　　　　　... Slack Code
-  - util/　     　... Encoder Decoder tools
-  - twitter/ 　　　　　　　... Twitter Code
-  - word2vec/ 　　　　　　　... Word2Vec Code
 ```
 #
 ### Licence
