@@ -1,0 +1,99 @@
+---
+- name: apt-get updates a server
+  apt: update_cache=yes
+  sudo: yes
+  tags: initial_setup
+
+- name: apt-get install basic pkg
+  apt: pkg={{ item }} state=installed
+  sudo: yes
+  with_items:
+  - apt-transport-https
+  - ca-certificates
+
+- name: Add Docker repository key
+  shell: apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+  sudo: yes
+  tags: docker
+
+- name: make lsit
+  shell: touch /etc/apt/sources.list.d/docker.list && echo deb https://apt.dockerproject.org/repo ubuntu-trusty main >> /etc/apt/sources.list.d/docker.list
+  sudo: yes
+  tags: docker
+
+- name: apt-get updates a server restart
+  apt: update_cache=yes
+  sudo: yes
+  tags: initial_setup
+
+- name: purge docker
+  shell: apt-get purge lxc-docker
+  sudo: yes
+  tags: docker
+
+- name: cache docker
+  shell: apt-cache policy docker-engine
+  sudo: yes
+  tags: initial_setup
+
+- name: apt-get install linux extra image pkg
+  apt: pkg=linux-image-extra-3.13.0-79-generic state=installed
+  sudo: yes
+  tags: initial_setup
+
+- name: apt-get updates a server
+  apt: update_cache=yes
+  sudo: yes
+  tags: initial_setup
+
+- name: apt-get install linux image generic pkg
+  apt: pkg=linux-image-generic-lts-trusty state=installed
+  sudo: yes
+  tags: initial_setup
+
+- name: Restart the server
+  shell: reboot now
+  sudo: yes
+
+- name: Wait until the virtual machine stop ssh port stop responding
+  local_action: wait_for host={{ inventory_hostname }} port=22 state=stopped
+  sudo: false
+
+- name: Wait for server to come up
+  local_action: wait_for host={{ inventory_hostname }} port=22 delay=30
+  sudo: false
+
+- name: apt-get updates a server
+  apt: update_cache=yes
+  sudo: yes
+  tags: initial_setup
+
+- name: apt-get install docker-engine
+  shell: apt-get install --force-yes -y docker-engine
+  sudo: yes
+  tags: docker
+
+- name: usermod -aG docker ubuntu
+  shell: usermod -aG docker ubuntu
+  sudo: yes
+  tags: docker
+
+- name: nat setting
+  shell: iptables -t nat -A POSTROUTING -j MASQUERADE
+  sudo: yes
+  tags: nat
+
+- name: nat setting2
+  shell: echo 1 | sudo tee /proc/sys/net/ipv4/conf/all/forwarding > /dev/null
+  sudo: yes
+  tags: nat
+
+- name: nat setting3
+  shell: mkdir -p /etc/openvpn && docker run --name ovpn-data -v /etc/openvpn busybox
+  sudo: yes
+  tags: nat
+
+- name: nat setting4
+  shell: docker run --volumes-from ovpn-data --rm gosuri/openvpn ovpn_genconfig -p {{ vpc_cidr }} -u udp://{{ public_ip }}
+  sudo: yes
+  tags: nat

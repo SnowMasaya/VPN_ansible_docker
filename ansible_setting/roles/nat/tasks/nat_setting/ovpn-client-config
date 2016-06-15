@@ -1,0 +1,3 @@
+ssh -t -i {your path}/terraform/ssh/insecure-deployer \
+"ubuntu@{your ip}" \
+sudo docker run --volumes-from ovpn-data --rm gosuri/openvpn ovpn_getclient $1 > "airpair-example.ovpn"
